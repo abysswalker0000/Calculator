@@ -3,8 +3,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextIndent
 
 val openSans = FontFamily(
     Font(R.font.opsmed, FontWeight.W400),
@@ -39,65 +42,73 @@ val openSans = FontFamily(
 
 
 val buttonList = listOf(
-    "C","del","(",")",
-    "1","2","3","+",
-    "4","5","6","-",
-    "7","8","9","*",
-    ".","0","=","/"
+    "C","del","(",")","sin",
+    "1","2","3","+","cos",
+    "4","5","6","-","tg",
+    "7","8","9","*","ctg",
+    ".","0","=","/","√"
 
 )
 @Composable
-fun Calculator(modifier: Modifier = Modifier, viewModel: CalculatorViewModel)
-{   val equationText=viewModel.eqationText.observeAsState()
-    val resultText=viewModel.resultText.observeAsState()
-    Box(modifier = modifier.background(color = Color(0xFF262626)).padding(bottom = 2.dp)) {
-        Column(modifier=modifier.fillMaxSize(),
-            horizontalAlignment =Alignment.Start,
-            )
-            {
-            Text(text=equationText.value?:"",
-                modifier= Modifier.padding(start = 16.dp),
+fun Calculator(modifier: Modifier = Modifier, viewModel: CalculatorViewModel) {
+    val equationText = viewModel.eqationText.observeAsState()
+    val resultText = viewModel.resultText.observeAsState()
+
+    Box(
+        modifier = modifier
+            .background(color = Color(0xFF262626))
+            .fillMaxSize()
+            .padding(bottom = 16.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text(
+                text = equationText.value ?: "",
+                modifier = Modifier.padding(start = 16.dp, top = 30.dp, bottom = 200.dp),
                 style = TextStyle(
-                fontSize = 35.sp,
+                    fontSize = 15.sp,
                     color = Color(0xFFD0BC2C),
-                textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Start,
                 ),
-                maxLines = 3,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.W900,
                 fontFamily = openSans,
+            )
+            Text(
+                text = resultText.value ?: "0",
+                modifier = Modifier.padding(start = 16.dp),
+                style = TextStyle(
+                    fontSize = 25.sp,
+                    textAlign = TextAlign.Start,
+                    color = Color(0xFFD0BC2C),
+                    fontWeight = FontWeight.W900,
+                    fontFamily = openSans,
+                ),
+                maxLines = 2,
+            )
 
-                )
-
-                Spacer(modifier=Modifier.weight(1f))
-
-                Text(text=resultText.value?:"0",
-                    modifier= Modifier.padding(start = 16.dp),
-                    style = TextStyle(
-                        fontSize = 25.sp,
-                        textAlign = TextAlign.Start,
-                        color = Color(0xFFD0BC2C),
-                        fontWeight = FontWeight.W900,
-                        fontFamily = openSans,
-                    ),
-                    maxLines = 2,)
-
-                Spacer(modifier=Modifier.height(10.dp))
-
-
-                LazyVerticalGrid(columns = GridCells.Fixed(4),
-                    modifier = Modifier.padding(8.dp),
-                    verticalArrangement =  Arrangement.spacedBy(5.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    )
-
-
-                {
-                    items(buttonList){
-                        CalculatorButton(btn=it, onClick = {
-                            viewModel.onButtonClick(it)
-                        })
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 8.dp),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                buttonList.chunked(5).forEach { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        row.forEach { button ->
+                            CalculatorButton(btn = button, onClick = {
+                                viewModel.onButtonClick(button)
+                            })
+                        }
                     }
+                }
             }
         }
     }
