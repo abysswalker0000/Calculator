@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
 import com.example.androidcalculator.ui.theme.AndroidCalculatorTheme
 
@@ -20,6 +21,8 @@ class MainActivity : ComponentActivity() {
 
         val calculatorViewModel = ViewModelProvider(this)[CalculatorViewModel::class.java]
         enableEdgeToEdge()
+        Thread.sleep(1000)
+        installSplashScreen()
         setContent {
             AndroidCalculatorTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

@@ -58,7 +58,7 @@ fun Calculator(modifier: Modifier = Modifier, viewModel: CalculatorViewModel) {
 fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: CalculatorViewModel) {
     Box(
         modifier = Modifier
-            .background(color = Color(0xFF262626))
+            .background(color = Color(0xFFE8EDFC))
             .fillMaxSize()
             .padding(bottom = 16.dp)
     ) {
@@ -69,10 +69,10 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
         ) {
             Text(
                 text = equationText ?: "",
-                modifier = Modifier.padding(start = 16.dp, top = 30.dp, bottom = 40.dp),
+                modifier = Modifier.padding(start = 16.dp, top = 90.dp, bottom = 40.dp),
                 style = TextStyle(
                     fontSize = 15.sp,
-                    color = Color(0xFFD0BC2C),
+                    color = Color(0xFF036280),
                     textAlign = TextAlign.Start,
                     fontWeight = FontWeight.W900,
                     fontFamily = openSans,
@@ -86,7 +86,7 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
                 style = TextStyle(
                     fontSize = 25.sp,
                     textAlign = TextAlign.Start,
-                    color = Color(0xFFD0BC2C),
+                    color = Color(0xFF036280),
                     fontWeight = FontWeight.W900,
                     fontFamily = openSans,
                 ),
@@ -120,7 +120,7 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
 fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: CalculatorViewModel) {
     Box(
         modifier = Modifier
-            .background(color = Color(0xFF262626))
+            .background(color = Color(0xFFE8EDFC))
             .fillMaxSize()
             .padding(bottom = 16.dp)
     ) {
@@ -141,7 +141,7 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
                     modifier = Modifier.padding(top = 30.dp, bottom = 10.dp),
                     style = TextStyle(
                         fontSize = 20.sp,
-                        color = Color(0xFFD0BC2C),
+                        color = Color(0xFF036280),
                         textAlign = TextAlign.Start,
                         fontWeight = FontWeight.W900,
                         fontFamily = openSans,
@@ -155,7 +155,7 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
                     style = TextStyle(
                         fontSize = 40.sp,
                         textAlign = TextAlign.Start,
-                        color = Color(0xFFD0BC2C),
+                        color = Color(0xFF036280),
                         fontWeight = FontWeight.W900,
                         fontFamily = openSans,
                     ),
@@ -207,12 +207,12 @@ fun CalculatorButton(btn: String, onClick: () -> Unit, size: Int = 65) {
 
 fun getButtonColor(btn: String): Color {
     return when {
-        btn in listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0") -> Color(0xFF13120F)
-        btn == "=" || btn == "C" -> Color(0xFFD0BC2C)
-        else -> Color(0xFF00000F)
+        btn in listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0") -> Color(0xFF81BECE)
+        btn == "=" || btn == "C" -> Color(0xFF012E4A)
+        else -> Color(0xFF378BA4)
     }
 }
 
 fun getContentColor(btn: String): Color {
-    return if (btn == "=" || btn == "C") Color(0xFF00000F) else Color(0xFFD0BC2C)
+    return if (btn == "=" || btn == "C") Color(0xFFCBD0CA) else Color(0xFFDDE0DD)
 }
