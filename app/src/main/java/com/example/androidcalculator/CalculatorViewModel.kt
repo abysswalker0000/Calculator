@@ -18,40 +18,60 @@ class CalculatorViewModel : ViewModel() {
     private val operators = listOf("+", "-", "*", "/", "√", "sin", "cos", "tg", "ctg")
 
     fun onButtonClick(btn: String) {
-        _equationText.value?.let {
+        _equationText.value?.let { currentEquation ->
             if (btn == "C") {
                 _equationText.value = ""
                 _resultText.value = "0"
                 return
             }
-
             if (btn == "del") {
-                if (it.isNotEmpty()) {
-                    _equationText.value = it.substring(0, it.length - 1)
+                if (currentEquation.isNotEmpty()) {
+                    _equationText.value = currentEquation.dropLast(1)
                 }
                 return
             }
-
             if (btn == "=") {
-                _equationText.value = _resultText.value
+                try {
+                    val result = calculateResult(currentEquation)
+                    _resultText.value = result
+                    _equationText.value = result
+                } catch (e: Exception) {
+                    Log.e("Calculator", "Error calculating result", e)
+                    _resultText.value = "Error"
+                }
                 return
             }
 
+          
             if (operators.contains(btn)) {
-                if (it.isNotEmpty() && operators.contains(it.last().toString())) {
-                    _equationText.value = it.dropLast(1) + btn
-                    return
-                }
                 if (btn in listOf("sin", "cos", "tg", "ctg", "√")) {
-                    _equationText.value = it + "$btn("
+
+                    if (currentEquation.isEmpty() || !operators.contains(currentEquation.last().toString())) {
+                        _equationText.value = currentEquation + "$btn("
+                    } else {
+
+                        _equationText.value = currentEquation + "$btn("
+                    }
+                    return
+                } else {
+
+                    if (currentEquation.isNotEmpty() && operators.contains(currentEquation.last().toString())) {
+
+                        _equationText.value = currentEquation.dropLast(1) + btn
+                    } else {
+
+                        _equationText.value = currentEquation + btn
+                    }
                     return
                 }
             }
 
-            _equationText.value = it + btn
+            _equationText.value = currentEquation + btn
             try {
                 _resultText.value = calculateResult(_equationText.value.toString())
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.e("Calculator", "Error calculating intermediate result", e)
+            }
         }
     }
 

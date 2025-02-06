@@ -45,7 +45,7 @@ fun Calculator(modifier: Modifier = Modifier, viewModel: CalculatorViewModel) {
     val resultText = viewModel.resultText.observeAsState()
 
     val configuration = LocalConfiguration.current
-    val isPortrait = configuration.orientation == 1 // 1 -> портрет, 2 -> альбом
+    val isPortrait = configuration.orientation == 1
 
     if (isPortrait) {
         VerticalCalculator(equationText = equationText.value, resultText = resultText.value, viewModel = viewModel)
@@ -69,7 +69,7 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
         ) {
             Text(
                 text = equationText ?: "",
-                modifier = Modifier.padding(start = 16.dp, top = 90.dp, bottom = 40.dp),
+                modifier = Modifier.padding(start = 16.dp, top = 60.dp, bottom = 40.dp),
                 style = TextStyle(
                     fontSize = 15.sp,
                     color = Color(0xFF036280),
@@ -122,7 +122,7 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
         modifier = Modifier
             .background(color = Color(0xFFE8EDFC))
             .fillMaxSize()
-            .padding(bottom = 16.dp)
+            .padding(bottom = 2.dp)
     ) {
         Row(
             modifier = Modifier
