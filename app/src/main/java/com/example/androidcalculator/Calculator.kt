@@ -1,6 +1,10 @@
 package com.example.androidcalculator
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -23,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 
@@ -192,9 +197,14 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
 
 @Composable
 fun CalculatorButton(btn: String, onClick: () -> Unit, size: Int = 65) {
+    val context = LocalContext.current // Получаем контекст с помощью LocalContext
+
     Box(modifier = Modifier.padding(3.dp)) {
         FloatingActionButton(
-            onClick = onClick,
+            onClick = {
+                onClick()
+                vibrate(context) // Добавление вибрации
+            },
             modifier = Modifier.size(size.dp),
             contentColor = getContentColor(btn),
             containerColor = getButtonColor(btn),
@@ -202,6 +212,16 @@ fun CalculatorButton(btn: String, onClick: () -> Unit, size: Int = 65) {
         ) {
             Text(text = btn, fontSize = 20.sp, fontWeight = FontWeight.W400, fontFamily = openSans)
         }
+    }
+}
+
+
+fun vibrate(context: Context) {
+    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+    } else {
+        vibrator.vibrate(50)
     }
 }
 

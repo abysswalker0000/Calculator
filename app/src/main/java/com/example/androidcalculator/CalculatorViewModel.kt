@@ -7,13 +7,13 @@ import androidx.lifecycle.ViewModel
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 
-class CalculatorViewModel : ViewModel() {
+class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() {
 
     private val _equationText = MutableLiveData("")
-    val eqationText : LiveData<String> = _equationText
+    val eqationText: LiveData<String> = _equationText
 
     private val _resultText = MutableLiveData("0")
-    val resultText : LiveData<String> = _resultText
+    val resultText: LiveData<String> = _resultText
 
     private val operators = listOf("+", "-", "*", "/", "√", "sin", "cos", "tg", "ctg")
 
@@ -38,28 +38,23 @@ class CalculatorViewModel : ViewModel() {
                 } catch (e: Exception) {
                     Log.e("Calculator", "Error calculating result", e)
                     _resultText.value = "Error"
+                    soundManager.playButtonSound()
                 }
                 return
             }
 
-          
             if (operators.contains(btn)) {
                 if (btn in listOf("sin", "cos", "tg", "ctg", "√")) {
-
                     if (currentEquation.isEmpty() || !operators.contains(currentEquation.last().toString())) {
                         _equationText.value = currentEquation + "$btn("
                     } else {
-
                         _equationText.value = currentEquation + "$btn("
                     }
                     return
                 } else {
-
                     if (currentEquation.isNotEmpty() && operators.contains(currentEquation.last().toString())) {
-
                         _equationText.value = currentEquation.dropLast(1) + btn
                     } else {
-
                         _equationText.value = currentEquation + btn
                     }
                     return

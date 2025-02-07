@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val splashScreen = installSplashScreen()
         splashScreen.setOnExitAnimationListener { splashScreenView ->
             splashScreenView.remove()
@@ -29,12 +30,13 @@ class MainActivity : ComponentActivity() {
         if (resources.configuration.orientation == 2) {
             window.insetsController?.hide(WindowInsets.Type.statusBars())
         }
-        val calculatorViewModel = ViewModelProvider(this)[CalculatorViewModel::class.java]
-
+        val soundManager = SoundManager(this)
+        val calculatorViewModel = ViewModelProvider(this, CalculatorViewModelFactory(soundManager))
+            .get(CalculatorViewModel::class.java)
         setContent {
             AndroidCalculatorTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Calculator(modifier = Modifier.padding(innerPadding), calculatorViewModel)
+                    Calculator(modifier = Modifier.padding(innerPadding), viewModel = calculatorViewModel)
                 }
             }
         }
