@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "930513445548",
+    "project_id": "kotlincalculator-5aafe",
+    "storage_bucket": "kotlincalculator-5aafe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:930513445548:android:53a1fb71da76bb973ff509",
+        "android_client_info": {
+          "package_name": "com.example.androidcalculator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB55xwYmKeiUUissuE5Nimo_CvRkpnLx3g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

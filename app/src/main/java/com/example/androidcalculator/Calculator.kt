@@ -143,7 +143,7 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
             ) {
                 Text(
                     text = equationText ?: "",
-                    modifier = Modifier.padding(top = 30.dp, bottom = 10.dp),
+                    modifier = Modifier.padding(top = 30.dp, bottom = 10.dp,start=28.dp),
                     style = TextStyle(
                         fontSize = 20.sp,
                         color = Color(0xFF036280),
@@ -156,7 +156,7 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
                 )
                 Text(
                     text = resultText ?: "0",
-                    modifier = Modifier.padding(bottom = 10.dp),
+                    modifier = Modifier.padding(bottom = 10.dp, start=28.dp),
                     style = TextStyle(
                         fontSize = 40.sp,
                         textAlign = TextAlign.Start,
@@ -197,13 +197,13 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
 
 @Composable
 fun CalculatorButton(btn: String, onClick: () -> Unit, size: Int = 65) {
-    val context = LocalContext.current // Получаем контекст с помощью LocalContext
+    val context = LocalContext.current
 
     Box(modifier = Modifier.padding(3.dp)) {
         FloatingActionButton(
             onClick = {
                 onClick()
-                vibrate(context) // Добавление вибрации
+                vibrate(context)
             },
             modifier = Modifier.size(size.dp),
             contentColor = getContentColor(btn),
