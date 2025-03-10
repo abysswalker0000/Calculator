@@ -16,7 +16,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "android    x.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -42,6 +42,7 @@ android {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+    implementation ("com.google.firebase:firebase-messaging:24.3.0")
     implementation("com.google.firebase:firebase-analytics")
     implementation("androidx.compose.runtime:runtime-livedata:1.7.5")
     implementation("org.mozilla:rhino:1.7R4")
@@ -59,6 +60,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

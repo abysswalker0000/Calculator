@@ -61,6 +61,9 @@ fun Calculator(modifier: Modifier = Modifier, viewModel: CalculatorViewModel) {
 
 @Composable
 fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: CalculatorViewModel) {
+    val history = viewModel.historyList.observeAsState(emptyList()) // Наблюдаем за историей
+    val sortedHistory = history.value.sortedByDescending { it["timestamp"] as Long } // Сортируем по таймштампу
+    val lastFourEntries = sortedHistory.take(4)
     Box(
         modifier = Modifier
             .background(color = Color(0xFFE8EDFC))
@@ -72,9 +75,37 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+            ) {
+                Text(
+                    text = "История:",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.W600,
+                        fontFamily = openSans
+                    )
+                )
+                lastFourEntries.forEach { entry ->
+                    Text(
+                        text = "${entry["equation"]} = ${entry["result"]}",
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            color = Color.DarkGray,
+                            fontFamily = openSans
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
             Text(
                 text = equationText ?: "",
-                modifier = Modifier.padding(start = 16.dp, top = 60.dp, bottom = 40.dp),
+                modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 40.dp),
                 style = TextStyle(
                     fontSize = 15.sp,
                     color = Color(0xFF036280),

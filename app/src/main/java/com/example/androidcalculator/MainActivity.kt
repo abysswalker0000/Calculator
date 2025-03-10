@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
         val soundManager = SoundManager(this)
         val calculatorViewModel = ViewModelProvider(this, CalculatorViewModelFactory(soundManager))
             .get(CalculatorViewModel::class.java)
+        calculatorViewModel.startListeningToHistory()
         setContent {
             AndroidCalculatorTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

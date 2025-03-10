@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 
@@ -15,7 +17,12 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
     private val _resultText = MutableLiveData("0")
     val resultText: LiveData<String> = _resultText
 
+    private val _historyList = MutableLiveData<List<Map<String, Any>>>()
+    val historyList: LiveData<List<Map<String, Any>>> = _historyList
+
     private val operators = listOf("+", "-", "*", "/", "√", "sin", "cos", "tg", "ctg")
+
+    private val db = FirebaseFirestore.getInstance()
 
     fun onButtonClick(btn: String) {
         _equationText.value?.let { currentEquation ->
@@ -32,8 +39,10 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
             }
             if (btn == "=") {
                 try {
-                    val result = calculateResult(currentEquation)
+                    val originalEquation = currentEquation
+                    val result = calculateResult(originalEquation)
                     _resultText.value = result
+                    saveToFirestore(originalEquation, result)
                     _equationText.value = result
                 } catch (e: Exception) {
                     Log.e("Calculator", "Error calculating result", e)
@@ -89,5 +98,38 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
             finalResult = finalResult.replace(".0", "")
         }
         return finalResult
+    }
+
+    private fun saveToFirestore(equation: String, result: String) {
+        val historyEntry = hashMapOf(
+            "equation" to equation,
+            "result" to result,
+            "timestamp" to System.currentTimeMillis()
+        )
+        db.collection("history")
+            .add(historyEntry)
+            .addOnSuccessListener { documentReference ->
+                Log.d("Calculator", "DocumentSnapshot added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Calculator", "Error adding document", e)
+            }
+    }
+
+    fun startListeningToHistory() {
+        db.collection("history")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w("Calculator", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val history = snapshot.documents.map { it.data ?: emptyMap() }
+                    _historyList.value = history
+                } else {
+                    Log.d("Calculator", "Current data: null")
+                }
+            }
     }
 }
