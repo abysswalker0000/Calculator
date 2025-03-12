@@ -101,6 +101,7 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
     }
 
     private fun saveToFirestore(equation: String, result: String) {
+        Log.d("FirestoreDebug", "saveToFirestore вызвана. Equation: $equation, Result: $result")
         val historyEntry = hashMapOf(
             "equation" to equation,
             "result" to result,

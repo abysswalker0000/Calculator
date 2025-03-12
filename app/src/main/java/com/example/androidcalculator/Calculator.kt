@@ -61,8 +61,8 @@ fun Calculator(modifier: Modifier = Modifier, viewModel: CalculatorViewModel) {
 
 @Composable
 fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: CalculatorViewModel) {
-    val history = viewModel.historyList.observeAsState(emptyList()) // Наблюдаем за историей
-    val sortedHistory = history.value.sortedByDescending { it["timestamp"] as Long } // Сортируем по таймштампу
+    val history = viewModel.historyList.observeAsState(emptyList())
+    val sortedHistory = history.value.sortedByDescending { it["timestamp"] as Long }
     val lastFourEntries = sortedHistory.take(4)
     Box(
         modifier = Modifier
