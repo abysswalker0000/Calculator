@@ -2,34 +2,34 @@ package com.example.androidcalculator
 
 import android.content.Context
 import android.os.Build
-import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.runtime.getValue
 
 val openSans = FontFamily(
     Font(R.font.opsmed, FontWeight.W400),
@@ -45,30 +45,70 @@ val buttonList = listOf(
 )
 
 @Composable
-fun Calculator(modifier: Modifier = Modifier, viewModel: CalculatorViewModel) {
-    val equationText = viewModel.eqationText.observeAsState()
-    val resultText = viewModel.resultText.observeAsState()
+fun Calculator(
+    modifier: Modifier = Modifier,
+    viewModel: CalculatorViewModel,
+    buttonColor: Color,
+    backgroundColor: Color,
+    equationColor: Color,
+    resultColor: Color,
+    historyColor: Color,
+    onThemeClick: () -> Unit
+) {
+    val equationText by viewModel.equationText.observeAsState("")
+    val resultText by viewModel.resultText.observeAsState("0")
 
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == 1
 
     if (isPortrait) {
-        VerticalCalculator(equationText = equationText.value, resultText = resultText.value, viewModel = viewModel)
+        VerticalCalculator(
+            equationText = equationText,
+            resultText = resultText,
+            viewModel = viewModel,
+            buttonColor = buttonColor,
+            backgroundColor = backgroundColor,
+            equationColor = equationColor,
+            resultColor = resultColor,
+            historyColor = historyColor,
+            onThemeClick = onThemeClick
+        )
     } else {
-        HorizontalCalculator(equationText = equationText.value, resultText = resultText.value, viewModel = viewModel)
+        HorizontalCalculator(
+            equationText = equationText,
+            resultText = resultText,
+            viewModel = viewModel,
+            buttonColor = buttonColor,
+            backgroundColor = backgroundColor,
+            equationColor = equationColor,
+            resultColor = resultColor,
+            historyColor = historyColor,
+            onThemeClick = onThemeClick
+        )
     }
 }
 
 @Composable
-fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: CalculatorViewModel) {
-    val history = viewModel.historyList.observeAsState(emptyList())
-    val sortedHistory = history.value.sortedByDescending { it["timestamp"] as Long }
+fun VerticalCalculator(
+    equationText: String,
+    resultText: String,
+    viewModel: CalculatorViewModel,
+    buttonColor: Color,
+    backgroundColor: Color,
+    equationColor: Color,
+    resultColor: Color,
+    historyColor: Color,
+    onThemeClick: () -> Unit
+) {
+    val history by viewModel.historyList.observeAsState(emptyList())
+    val sortedHistory = history.sortedByDescending { it["timestamp"] as Long }
     val lastFourEntries = sortedHistory.take(4)
+
     Box(
         modifier = Modifier
-            .background(color = Color(0xFFE8EDFC))
+            .background(color = backgroundColor)
             .fillMaxSize()
-            .padding(bottom = 16.dp)
+            .padding(top = 32.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -84,7 +124,7 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
                     text = "История:",
                     style = TextStyle(
                         fontSize = 14.sp,
-                        color = Color.Gray,
+                        color = historyColor,
                         fontWeight = FontWeight.W600,
                         fontFamily = openSans
                     )
@@ -94,7 +134,7 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
                         text = "${entry["equation"]} = ${entry["result"]}",
                         style = TextStyle(
                             fontSize = 12.sp,
-                            color = Color.DarkGray,
+                            color = historyColor,
                             fontFamily = openSans
                         ),
                         maxLines = 1,
@@ -104,27 +144,27 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
             }
 
             Text(
-                text = equationText ?: "",
-                modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 40.dp),
+                text = equationText,
+                modifier = Modifier.padding(start = 16.dp, top = 60.dp, bottom = 40.dp),
                 style = TextStyle(
                     fontSize = 15.sp,
-                    color = Color(0xFF036280),
+                    color = equationColor,
                     textAlign = TextAlign.Start,
                     fontWeight = FontWeight.W900,
-                    fontFamily = openSans,
+                    fontFamily = openSans
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = resultText ?: "0",
+                text = resultText,
                 modifier = Modifier.padding(start = 16.dp),
                 style = TextStyle(
                     fontSize = 25.sp,
                     textAlign = TextAlign.Start,
-                    color = Color(0xFF036280),
+                    color = resultColor,
                     fontWeight = FontWeight.W900,
-                    fontFamily = openSans,
+                    fontFamily = openSans
                 ),
                 maxLines = 2
             )
@@ -141,24 +181,43 @@ fun VerticalCalculator(equationText: String?, resultText: String?, viewModel: Ca
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         row.forEach { button ->
-                            CalculatorButton(btn = button, onClick = {
-                                viewModel.onButtonClick(button)
-                            })
+                            CalculatorButton(
+                                btn = button,
+                                onClick = { viewModel.onButtonClick(button) },
+                                buttonColor = buttonColor,
+                                size = 64
+                            )
                         }
                     }
                 }
             }
         }
+        IconButton(
+            onClick = onThemeClick,
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(Icons.Filled.Settings, contentDescription = "Тема")
+        }
     }
 }
 
 @Composable
-fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: CalculatorViewModel) {
+fun HorizontalCalculator(
+    equationText: String,
+    resultText: String,
+    viewModel: CalculatorViewModel,
+    buttonColor: Color,
+    backgroundColor: Color,
+    equationColor: Color,
+    resultColor: Color,
+    historyColor: Color,
+    onThemeClick: () -> Unit
+) {
     Box(
         modifier = Modifier
-            .background(color = Color(0xFFE8EDFC))
+            .background(color = backgroundColor)
             .fillMaxSize()
-            .padding(bottom = 2.dp)
+            .padding(top = 5.dp)
     ) {
         Row(
             modifier = Modifier
@@ -173,27 +232,27 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
                 verticalArrangement = Arrangement.Top
             ) {
                 Text(
-                    text = equationText ?: "",
-                    modifier = Modifier.padding(top = 30.dp, bottom = 10.dp,start=28.dp),
+                    text = equationText,
+                    modifier = Modifier.padding(top = 30.dp, bottom = 10.dp, start = 28.dp),
                     style = TextStyle(
                         fontSize = 20.sp,
-                        color = Color(0xFF036280),
+                        color = equationColor,
                         textAlign = TextAlign.Start,
                         fontWeight = FontWeight.W900,
-                        fontFamily = openSans,
+                        fontFamily = openSans
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = resultText ?: "0",
-                    modifier = Modifier.padding(bottom = 10.dp, start=28.dp),
+                    text = resultText,
+                    modifier = Modifier.padding(top = 10.dp, start = 28.dp),
                     style = TextStyle(
                         fontSize = 40.sp,
                         textAlign = TextAlign.Start,
-                        color = Color(0xFF036280),
+                        color = resultColor,
                         fontWeight = FontWeight.W900,
-                        fontFamily = openSans,
+                        fontFamily = openSans
                     ),
                     maxLines = 2
                 )
@@ -213,22 +272,33 @@ fun HorizontalCalculator(equationText: String?, resultText: String?, viewModel: 
                         row.forEach { button ->
                             CalculatorButton(
                                 btn = button,
-                                onClick = {
-                                    viewModel.onButtonClick(button)
-                                },
-                                size = 58
+                                onClick = { viewModel.onButtonClick(button) },
+                                buttonColor = buttonColor,
+                                size = 60
                             )
                         }
                     }
                 }
             }
         }
+        IconButton(
+            onClick = onThemeClick,
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(Icons.Filled.Settings, contentDescription = "Тема")
+        }
     }
 }
 
 @Composable
-fun CalculatorButton(btn: String, onClick: () -> Unit, size: Int = 65) {
+fun CalculatorButton(
+    btn: String,
+    onClick: () -> Unit,
+    buttonColor: Color,
+    size: Int = 60
+) {
     val context = LocalContext.current
+    val elevation = if (btn in listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "=", "C")) 0.dp else 6.dp
 
     Box(modifier = Modifier.padding(3.dp)) {
         FloatingActionButton(
@@ -238,14 +308,14 @@ fun CalculatorButton(btn: String, onClick: () -> Unit, size: Int = 65) {
             },
             modifier = Modifier.size(size.dp),
             contentColor = getContentColor(btn),
-            containerColor = getButtonColor(btn),
-            shape = CircleShape
+            containerColor = getButtonColor(btn, buttonColor),
+            shape = CircleShape,
+            elevation = FloatingActionButtonDefaults.elevation(elevation)
         ) {
-            Text(text = btn, fontSize = 20.sp, fontWeight = FontWeight.W400, fontFamily = openSans)
+            Text(text = btn, fontSize = 18.sp, fontWeight = FontWeight.W400, fontFamily = openSans)
         }
     }
 }
-
 
 fun vibrate(context: Context) {
     val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
@@ -256,11 +326,11 @@ fun vibrate(context: Context) {
     }
 }
 
-fun getButtonColor(btn: String): Color {
+fun getButtonColor(btn: String, baseColor: Color): Color {
     return when {
-        btn in listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0") -> Color(0xFF81BECE)
-        btn == "=" || btn == "C" -> Color(0xFF012E4A)
-        else -> Color(0xFF378BA4)
+        btn in listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0") -> baseColor.copy(alpha = 0.7f)
+        btn == "=" || btn == "C" -> baseColor.copy(alpha = 0.5f)
+        else -> baseColor
     }
 }
 

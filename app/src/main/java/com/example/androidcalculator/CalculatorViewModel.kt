@@ -5,14 +5,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 
+data class ThemeSettings(
+    val buttonColor: String = "#036280",
+    val backgroundColor: String = "#E8EDFC",
+    val equationColor: String = "#036280",
+    val resultColor: String = "#036280",
+    val historyColor: String = "#444444"
+)
+
 class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() {
+    val db = FirebaseFirestore.getInstance()
 
     private val _equationText = MutableLiveData("")
-    val eqationText: LiveData<String> = _equationText
+    val equationText: LiveData<String> = _equationText
 
     private val _resultText = MutableLiveData("0")
     val resultText: LiveData<String> = _resultText
@@ -20,9 +28,10 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
     private val _historyList = MutableLiveData<List<Map<String, Any>>>()
     val historyList: LiveData<List<Map<String, Any>>> = _historyList
 
-    private val operators = listOf("+", "-", "*", "/", "√", "sin", "cos", "tg", "ctg")
+    private val _themeSettings = MutableLiveData<ThemeSettings>()
+    val themeSettings: LiveData<ThemeSettings> = _themeSettings
 
-    private val db = FirebaseFirestore.getInstance()
+    private val operators = listOf("+", "-", "*", "/", "√", "sin", "cos", "tg", "ctg")
 
     fun onButtonClick(btn: String) {
         _equationText.value?.let { currentEquation ->
@@ -81,7 +90,6 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
 
     fun calculateResult(equation: String): String {
         var updatedEquation = equation
-
         updatedEquation = updatedEquation.replace(Regex("([0-9)])(\\(|sin|cos|tg|ctg|√)"), "$1*$2")
         updatedEquation = updatedEquation.replace("√", "Math.sqrt")
         updatedEquation = updatedEquation.replace("sin", "Math.sin")
@@ -94,14 +102,13 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
         val scriptable: Scriptable = context.initStandardObjects()
 
         var finalResult = context.evaluateString(scriptable, updatedEquation, "Javascript", 1, null).toString()
-        if (finalResult.endsWith("0")) {
+        if (finalResult.endsWith(".0")) {
             finalResult = finalResult.replace(".0", "")
         }
         return finalResult
     }
 
     private fun saveToFirestore(equation: String, result: String) {
-        Log.d("FirestoreDebug", "saveToFirestore вызвана. Equation: $equation, Result: $result")
         val historyEntry = hashMapOf(
             "equation" to equation,
             "result" to result,
@@ -119,7 +126,7 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
 
     fun startListeningToHistory() {
         db.collection("history")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
                     Log.w("Calculator", "Listen failed.", e)
@@ -131,6 +138,27 @@ class CalculatorViewModel(private val soundManager: SoundManager) : ViewModel() 
                 } else {
                     Log.d("Calculator", "Current data: null")
                 }
+            }
+    }
+
+    fun fetchThemeSettings() {
+        db.collection("settings").document("theme")
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val buttonColor = document.getString("buttonColor") ?: "#036280"
+                    val backgroundColor = document.getString("backgroundColor") ?: "#E8EDFC"
+                    val equationColor = document.getString("equationColor") ?: "#036280"
+                    val resultColor = document.getString("resultColor") ?: "#036280"
+                    val historyColor = document.getString("historyColor") ?: "#444444"
+                    _themeSettings.value = ThemeSettings(buttonColor, backgroundColor, equationColor, resultColor, historyColor)
+                } else {
+                    _themeSettings.value = ThemeSettings()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("Calculator", "Ошибка получения настроек цвета", e)
+                _themeSettings.value = ThemeSettings()
             }
     }
 }

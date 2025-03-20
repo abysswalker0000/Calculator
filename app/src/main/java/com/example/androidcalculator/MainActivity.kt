@@ -8,15 +8,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
-import com.example.androidcalculator.ui.theme.AndroidCalculatorTheme
 import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
@@ -35,7 +38,9 @@ class MainActivity : ComponentActivity() {
         val soundManager = SoundManager(this)
         val calculatorViewModel = ViewModelProvider(this, CalculatorViewModelFactory(soundManager))
             .get(CalculatorViewModel::class.java)
+
         calculatorViewModel.startListeningToHistory()
+        calculatorViewModel.fetchThemeSettings()
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -47,11 +52,140 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            AndroidCalculatorTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Calculator(modifier = Modifier.padding(innerPadding), viewModel = calculatorViewModel)
+            val themeSettings by calculatorViewModel.themeSettings.observeAsState(ThemeSettings())
+            val buttonColor = Color(android.graphics.Color.parseColor(themeSettings.buttonColor))
+            val backgroundColor = Color(android.graphics.Color.parseColor(themeSettings.backgroundColor))
+            val equationColor = Color(android.graphics.Color.parseColor(themeSettings.equationColor))
+            val resultColor = Color(android.graphics.Color.parseColor(themeSettings.resultColor))
+            val historyColor = Color(android.graphics.Color.parseColor(themeSettings.historyColor))
+            var showThemeDialog by remember { mutableStateOf(false) }
+
+            Scaffold(
+                modifier = Modifier.fillMaxSize()
+            ) { innerPadding ->
+                Calculator(
+                    modifier = Modifier.padding(innerPadding),
+                    viewModel = calculatorViewModel,
+                    buttonColor = buttonColor,
+                    backgroundColor = backgroundColor,
+                    equationColor = equationColor,
+                    resultColor = resultColor,
+                    historyColor = historyColor,
+                    onThemeClick = { showThemeDialog = true }
+                )
+                if (showThemeDialog) {
+                    ThemeCustomizationDialog(
+                        currentButtonColor = themeSettings.buttonColor,
+                        currentBackgroundColor = themeSettings.backgroundColor,
+                        currentEquationColor = themeSettings.equationColor,
+                        currentResultColor = themeSettings.resultColor,
+                        currentHistoryColor = themeSettings.historyColor,
+                        onDismiss = { showThemeDialog = false },
+                        onSave = { buttonCol, backCol, eqCol, resCol, histCol ->
+                            calculatorViewModel.db.collection("settings").document("theme")
+                                .set(mapOf(
+                                    "buttonColor" to buttonCol,
+                                    "backgroundColor" to backCol,
+                                    "equationColor" to eqCol,
+                                    "resultColor" to resCol,
+                                    "historyColor" to histCol
+                                ))
+                                .addOnSuccessListener {
+                                    Log.d("Calculator", "Цвета обновлены")
+                                    calculatorViewModel.fetchThemeSettings()
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w("Calculator", "Ошибка обновления цветов", e)
+                                }
+                            showThemeDialog = false
+                        },
+                        onReset = {
+                            calculatorViewModel.db.collection("settings").document("theme")
+                                .set(mapOf(
+                                    "buttonColor" to "#036280",
+                                    "backgroundColor" to "#E8EDFC",
+                                    "equationColor" to "#036280",
+                                    "resultColor" to "#036280",
+                                    "historyColor" to "#444444"
+                                ))
+                                .addOnSuccessListener {
+                                    Log.d("Calculator", "Тема сброшена")
+                                    calculatorViewModel.fetchThemeSettings()
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w("Calculator", "Ошибка сброса темы", e)
+                                }
+                            showThemeDialog = false
+                        }
+                    )
                 }
+            }
+            LaunchedEffect(themeSettings) {
+                window.statusBarColor = android.graphics.Color.parseColor(themeSettings.buttonColor)
             }
         }
     }
+}
+
+@Composable
+fun ThemeCustomizationDialog(
+    currentButtonColor: String,
+    currentBackgroundColor: String,
+    currentEquationColor: String,
+    currentResultColor: String,
+    currentHistoryColor: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String, String, String, String) -> Unit,
+    onReset: () -> Unit
+) {
+    var buttonColorText by remember { mutableStateOf(currentButtonColor) }
+    var backgroundColorText by remember { mutableStateOf(currentBackgroundColor) }
+    var equationColorText by remember { mutableStateOf(currentEquationColor) }
+    var resultColorText by remember { mutableStateOf(currentResultColor) }
+    var historyColorText by remember { mutableStateOf(currentHistoryColor) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Настройка цветов") },
+        text = {
+            Column {
+                Text("Цвет кнопок (HEX код, например #036280):")
+                TextField(value = buttonColorText, onValueChange = { buttonColorText = it })
+                Text("Цвет фона (HEX код, например #E8EDFC):")
+                TextField(value = backgroundColorText, onValueChange = { backgroundColorText = it })
+                Text("Цвет уравнения (HEX код):")
+                TextField(value = equationColorText, onValueChange = { equationColorText = it })
+                Text("Цвет результата (HEX код):")
+                TextField(value = resultColorText, onValueChange = { resultColorText = it })
+                Text("Цвет истории (HEX код):")
+                TextField(value = historyColorText, onValueChange = { historyColorText = it })
+                errorMessage?.let {
+                    Text(it, color = Color.Red)
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                if (isValidHexColor(buttonColorText) && isValidHexColor(backgroundColorText) &&
+                    isValidHexColor(equationColorText) && isValidHexColor(resultColorText) &&
+                    isValidHexColor(historyColorText)) {
+                    onSave(buttonColorText, backgroundColorText, equationColorText, resultColorText, historyColorText)
+                } else {
+                    errorMessage = "Некорректный HEX-код. Используйте формат #RRGGBB."
+                }
+            }) {
+                Text("Сохранить")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onReset) {
+                Text("Сбросить на изначальную")
+            }
+        }
+    )
+}
+
+fun isValidHexColor(color: String): Boolean {
+    return color.matches(Regex("^#[0-9A-Fa-f]{6}$"))
 }
