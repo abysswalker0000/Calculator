@@ -62,6 +62,7 @@ dependencies {
     implementation ("androidx.security:security-crypto:1.1.0-alpha06")
     implementation ("androidx.appcompat:appcompat:1.6.1")
     implementation ("com.google.android.libraries.identity.googleid:googleid:1.0.0")
+    implementation("com.google.android.gms:play-services-fido:20.0.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
