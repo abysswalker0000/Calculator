@@ -8,12 +8,18 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
@@ -60,28 +66,37 @@ class LoginActivity : AppCompatActivity() {
         var passKeyInput by remember { mutableStateOf("") }
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
-        Column {
-            TextField(
-                value = passKeyInput,
-                onValueChange = { passKeyInput = it },
-                label = { Text("Введите Pass Key") },
-                visualTransformation = PasswordVisualTransformation()
-            )
-            Button(onClick = {
-                if (validatePassKey(passKeyInput, sharedPreferences)) {
-                    grantAccess(sharedPreferences)
-                } else {
-                    errorMessage = "Неверный Pass Key"
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TextField(
+                    value = passKeyInput,
+                    onValueChange = { passKeyInput = it },
+                    label = { Text("Введите Pass Key") },
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                Button(onClick = {
+                    if (validatePassKey(passKeyInput, sharedPreferences)) {
+                        grantAccess(sharedPreferences)
+                    } else {
+                        errorMessage = "Неверный Pass Key"
+                    }
+                }) {
+                    Text("Войти")
                 }
-            }) {
-                Text("Войти")
+                TextButton(onClick = {
+                    setupBiometricAuthentication(sharedPreferences)
+                }) {
+                    Text("Сбросить Pass Key")
+                }
+                errorMessage?.let { Text(it, color = Color.Red) }
             }
-            TextButton(onClick = {
-                setupBiometricAuthentication(sharedPreferences)
-            }) {
-                Text("Сбросить Pass Key")
-            }
-            errorMessage?.let { Text(it, color = Color.Red) }
         }
     }
 
